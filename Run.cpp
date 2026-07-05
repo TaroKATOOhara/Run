@@ -57,6 +57,8 @@ VEC2 NewVEC2(int x, int y)
 // ゲームを初期状態にする
 void Init(Game& game)
 {
+	// 初期パラメータ設定
+	Init((game.camera), NewVEC2(0, 0), NewVEC2(WIDTH, HEIGHT), 0xFF0000);		// カメラに対して、色は無意味とする
 	Init((game.body), NewVEC2(WIDTH/2, HEIGHT/2), NewVEC2(150, 75), 0xFF0000);
 	Init((game.legL), NewVEC2(0, 0), NewVEC2(0, 0), 0);
 	Init((game.legR), NewVEC2(0, 0), NewVEC2(0, 0), 0);
@@ -80,6 +82,16 @@ void Draw(Game& game)
 
 // オブジェクトを描画(楕円版)
 void Draw(Object& obj)
+{
+	int x1 = obj.pos.x - obj.size.x / 2;
+	int y1 = obj.pos.y - obj.size.y / 2;
+	int x2 = obj.pos.x + obj.size.x / 2;
+	int y2 = obj.pos.y + obj.size.y / 2;
+	DrawOval_Rect(x1, y1, x2, y2, obj.color, true);
+}
+
+// オブジェクトをカメラで描画(楕円版)
+void Draw(Object& cam, Object& obj)
 {
 	int x1 = obj.pos.x - obj.size.x / 2;
 	int y1 = obj.pos.y - obj.size.y / 2;
