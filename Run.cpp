@@ -7,7 +7,7 @@ const int FPS = 60;
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
-	SetWindowText("title");	// ウィンドウのタイトル
+	SetWindowText("RealRun");	// ウィンドウのタイトル
 	SetGraphMode(WIDTH, HEIGHT, 32);// ウィンドウサイズ、カラー設定
 	ChangeWindowMode(true);		// ウィンドウモード
 	if (DxLib_Init() == -1) return -1;	// ライブラリ初期化、エラーが出たら終了
@@ -25,13 +25,36 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		//// ゲームの処理
 		GetJoypadDirectInputState(DX_INPUT_PAD1, &inputState);
 
+
+
+		// カメラテスト
+		if (inputState.X > 0) game.camera.pos.x++;
+		if (inputState.X < 0) game.camera.pos.x--;
+		if (inputState.Y > 0) game.camera.pos.y++;
+		if (inputState.Y < 0) game.camera.pos.y--;
+		if (inputState.Rx > 0) game.camera.size.x++;
+		if (inputState.Rx < 0) game.camera.size.x--;
+		if (inputState.Ry > 0) game.camera.size.y++;
+		if (inputState.Ry < 0) game.camera.size.y--;
+
+		// テスト用表示
 		DrawFormatString(10, 10,	0x000000, "%5d", inputState.X);
 		DrawFormatString(10, 25,	0x000000, "%5d", inputState.Y);
 		DrawFormatString(10, 40,	0x000000, "%5d", inputState.Z);
 		DrawFormatString(70, 10,	0x000000, "%5d", inputState.Rx);
 		DrawFormatString(70, 25,	0x000000, "%5d", inputState.Ry);
 		DrawFormatString(70, 40,	0x000000, "%5d", inputState.Rz);
+
+		DrawFormatString(200, 10, 0x000000, "Camera", 0);
+		DrawFormatString(200, 25, 0x000000, " posX: %5d", game.camera.pos.x);
+		DrawFormatString(200, 40, 0x000000, " posY: %5d", game.camera.pos.y);
+		DrawFormatString(200, 55, 0x000000, "sizeX: %5d", game.camera.size.x);
+		DrawFormatString(200, 70, 0x000000, "sizeY: %5d", game.camera.size.y);
+
 		
+
+
+
 		Draw(game);
 
 
@@ -75,9 +98,9 @@ void Init(Object& object, VEC2 pos, VEC2 size, int c)
 // ゲーム中のオブジェクトを全描画
 void Draw(Game& game)
 {
-	Draw(game.legL);
-	Draw(game.legR);
-	Draw(game.body);
+	Draw(game.camera, game.legL);
+	Draw(game.camera, game.legR);
+	Draw(game.camera, game.body);
 }
 
 // オブジェクトを描画(楕円版)
@@ -93,9 +116,27 @@ void Draw(Object& obj)
 // オブジェクトをカメラで描画(楕円版)
 void Draw(Object& cam, Object& obj)
 {
+	// キャラクター描画用のワールド座標を決める
 	int x1 = obj.pos.x - obj.size.x / 2;
 	int y1 = obj.pos.y - obj.size.y / 2;
 	int x2 = obj.pos.x + obj.size.x / 2;
 	int y2 = obj.pos.y + obj.size.y / 2;
+
+	// カメラからの相対座標に変換
+	x1 = x1 - cam.pos.x;
+	y1 = y1 - cam.pos.y;
+	x2 = x2 - cam.pos.x;
+	y2 = y2 - cam.pos.y;
+
+	// カメラの描画範囲を考慮したズーム
+	// 縦横の拡大率
+	float zoomX = (float)WIDTH / (float)cam.size.x;
+	float zoomY = (float)HEIGHT / (float)cam.size.y;
+	x1 = (float)(x1 * zoomX);
+	y1 = (float)(y1 * zoomY);
+	x2 = (float)(x2 * zoomX);
+	y2 = (float)(y2 * zoomY);
+	
+
 	DrawOval_Rect(x1, y1, x2, y2, obj.color, true);
 }
