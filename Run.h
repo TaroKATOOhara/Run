@@ -26,8 +26,9 @@ struct Game {
 };
 
 // 関数
+void DebugCamera(Game& game);
 VEC2 NewVEC2(int x, int y);
-void Init(Game &game);	// ゲームを初期状態にする
+void Init(Game& game);	// ゲームを初期状態にする
 void Init(Object& object, VEC2 pos, VEC2 size, int c);	// 各Objectにパラメータ設定
 void Draw(Game& game);	// ゲーム中のオブジェクトを全描画
 void Draw(Object& obj);	// オブジェクトを描画(ワールド座標＝画面座標)

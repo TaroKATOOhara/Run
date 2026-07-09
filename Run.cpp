@@ -14,7 +14,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	SetBackgroundColor(255, 255, 255);	// 背景色の指定
 	SetDrawScreen(DX_SCREEN_BACK);	// 裏画面に描画
 
-	DINPUT_JOYSTATE inputState;
 	Game game;
 	Init(game);
 
@@ -23,35 +22,10 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		ClearDrawScreen();
 
 		//// ゲームの処理
-		GetJoypadDirectInputState(DX_INPUT_PAD1, &inputState);
-
-
-
-		// カメラテスト
-		if (inputState.X > 0) game.camera.pos.x++;
-		if (inputState.X < 0) game.camera.pos.x--;
-		if (inputState.Y > 0) game.camera.pos.y++;
-		if (inputState.Y < 0) game.camera.pos.y--;
-		if (inputState.Rx > 0) game.camera.size.x++;
-		if (inputState.Rx < 0) game.camera.size.x--;
-		if (inputState.Ry > 0) game.camera.size.y++;
-		if (inputState.Ry < 0) game.camera.size.y--;
-
-		// テスト用表示
-		DrawFormatString(10, 10,	0x000000, "%5d", inputState.X);
-		DrawFormatString(10, 25,	0x000000, "%5d", inputState.Y);
-		DrawFormatString(10, 40,	0x000000, "%5d", inputState.Z);
-		DrawFormatString(70, 10,	0x000000, "%5d", inputState.Rx);
-		DrawFormatString(70, 25,	0x000000, "%5d", inputState.Ry);
-		DrawFormatString(70, 40,	0x000000, "%5d", inputState.Rz);
-
-		DrawFormatString(200, 10, 0x000000, "Camera", 0);
-		DrawFormatString(200, 25, 0x000000, " posX: %5d", game.camera.pos.x);
-		DrawFormatString(200, 40, 0x000000, " posY: %5d", game.camera.pos.y);
-		DrawFormatString(200, 55, 0x000000, "sizeX: %5d", game.camera.size.x);
-		DrawFormatString(200, 70, 0x000000, "sizeY: %5d", game.camera.size.y);
-
+		GetJoypadDirectInputState(DX_INPUT_PAD1, &game.inputState);
 		
+
+		DebugCamera(game);
 
 
 
@@ -83,7 +57,7 @@ void Init(Game& game)
 	// 初期パラメータ設定
 	Init((game.camera), NewVEC2(0, 0), NewVEC2(WIDTH, HEIGHT), 0xFF0000);		// カメラに対して、色は無意味とする
 	Init((game.body), NewVEC2(WIDTH/2, HEIGHT/2), NewVEC2(150, 75), 0xFF0000);
-	Init((game.legL), NewVEC2(0, 0), NewVEC2(0, 0), 0);
+	Init((game.legL), NewVEC2(0, 0), NewVEC2(100, 100), 0x00FF00);
 	Init((game.legR), NewVEC2(0, 0), NewVEC2(0, 0), 0);
 }
 
@@ -122,21 +96,49 @@ void Draw(Object& cam, Object& obj)
 	int x2 = obj.pos.x + obj.size.x / 2;
 	int y2 = obj.pos.y + obj.size.y / 2;
 
-	// カメラからの相対座標に変換
-	x1 = x1 - cam.pos.x;
-	y1 = y1 - cam.pos.y;
-	x2 = x2 - cam.pos.x;
-	y2 = y2 - cam.pos.y;
+	// カメラの撮影範囲の右上からの相対座標に変換
+	x1 = x1 - cam.pos.x + cam.size.x / 2;
+	y1 = y1 - cam.pos.y + cam.size.y / 2;
+	x2 = x2 - cam.pos.x + cam.size.x / 2;
+	y2 = y2 - cam.pos.y + cam.size.y / 2;
 
 	// カメラの描画範囲を考慮したズーム
 	// 縦横の拡大率
 	float zoomX = (float)WIDTH / (float)cam.size.x;
 	float zoomY = (float)HEIGHT / (float)cam.size.y;
-	x1 = (float)(x1 * zoomX);
-	y1 = (float)(y1 * zoomY);
-	x2 = (float)(x2 * zoomX);
-	y2 = (float)(y2 * zoomY);
+	x1 = (int)(x1 * zoomX);
+	y1 = (int)(y1 * zoomY);
+	x2 = (int)(x2 * zoomX);
+	y2 = (int)(y2 * zoomY);
 	
 
 	DrawOval_Rect(x1, y1, x2, y2, obj.color, true);
+}
+
+// カメラテスト用
+void DebugCamera(Game& game)
+{
+	// カメラテスト
+	if (game.inputState.X > 0) game.camera.pos.x+=5;
+	if (game.inputState.X < 0) game.camera.pos.x-=5;
+	if (game.inputState.Y > 0) game.camera.pos.y+=5;
+	if (game.inputState.Y < 0) game.camera.pos.y-=5;
+	if (game.inputState.Rx > 0) game.camera.size.x+=5;
+	if (game.inputState.Rx < 0) game.camera.size.x-=5;
+	if (game.inputState.Ry > 0) game.camera.size.y+=5;
+	if (game.inputState.Ry < 0) game.camera.size.y-=5;
+
+	// テスト用表示
+	DrawFormatString(10, 10, 0x000000, "%5d", game.inputState.X);
+	DrawFormatString(10, 25, 0x000000, "%5d", game.inputState.Y);
+	DrawFormatString(10, 40, 0x000000, "%5d", game.inputState.Z);
+	DrawFormatString(70, 10, 0x000000, "%5d", game.inputState.Rx);
+	DrawFormatString(70, 25, 0x000000, "%5d", game.inputState.Ry);
+	DrawFormatString(70, 40, 0x000000, "%5d", game.inputState.Rz);
+
+	DrawFormatString(200, 10, 0x000000, "Camera", 0);
+	DrawFormatString(200, 25, 0x000000, " posX: %5d", game.camera.pos.x);
+	DrawFormatString(200, 40, 0x000000, " posY: %5d", game.camera.pos.y);
+	DrawFormatString(200, 55, 0x000000, "sizeX: %5d", game.camera.size.x);
+	DrawFormatString(200, 70, 0x000000, "sizeY: %5d", game.camera.size.y);
 }
