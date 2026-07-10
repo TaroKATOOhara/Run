@@ -22,13 +22,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		ClearDrawScreen();
 
 		//// ゲームの処理
-		GetJoypadDirectInputState(DX_INPUT_PAD1, &game.inputState);
-		
-
-		DebugCamera(game);
-
-
-
+		GetJoypadDirectInputState(DX_INPUT_PAD1, &game.inputState);	// キー入力取得
+		// DebugCamera(game);
+		Move(game);
 		Draw(game);
 
 
@@ -56,9 +52,9 @@ void Init(Game& game)
 {
 	// 初期パラメータ設定
 	Init((game.camera), NewVEC2(0, 0), NewVEC2(WIDTH, HEIGHT), 0xFF0000);		// カメラに対して、色は無意味とする
-	Init((game.body), NewVEC2(WIDTH/2, HEIGHT/2), NewVEC2(150, 75), 0xFF0000);
-	Init((game.legL), NewVEC2(0, 0), NewVEC2(100, 100), 0x00FF00);
-	Init((game.legR), NewVEC2(0, 0), NewVEC2(0, 0), 0);
+	Init((game.body), NewVEC2(0, 0), NewVEC2(100, 75), 0xFF0000);
+	Init((game.legL), NewVEC2(-75, 0), NewVEC2(100, 100), 0x00FF00);
+	Init((game.legR), NewVEC2( 75, 0), NewVEC2(100, 100), 0x00FF00);
 }
 
 // 各Objectにパラメータ設定
@@ -67,6 +63,12 @@ void Init(Object& object, VEC2 pos, VEC2 size, int c)
 	object.pos = pos;
 	object.size = size;
 	object.color = c;
+}
+
+
+void Move(Game& game)	// 1f分の挙動
+{
+
 }
 
 // ゲーム中のオブジェクトを全描画
@@ -104,12 +106,12 @@ void Draw(Object& cam, Object& obj)
 
 	// カメラの描画範囲を考慮したズーム
 	// 縦横の拡大率
-	float zoomX = (float)WIDTH / (float)cam.size.x;
-	float zoomY = (float)HEIGHT / (float)cam.size.y;
-	x1 = (int)(x1 * zoomX);
-	y1 = (int)(y1 * zoomY);
-	x2 = (int)(x2 * zoomX);
-	y2 = (int)(y2 * zoomY);
+	float zoomX = static_cast <float>(WIDTH) / static_cast <float>(cam.size.x);
+	float zoomY = static_cast <float>(HEIGHT) / static_cast <float>(cam.size.y);
+	x1 = static_cast <int>(x1 * zoomX);
+	y1 = static_cast <int>(y1 * zoomY);
+	x2 = static_cast <int>(x2 * zoomX);
+	y2 = static_cast <int>(y2 * zoomY);
 	
 
 	DrawOval_Rect(x1, y1, x2, y2, obj.color, true);
