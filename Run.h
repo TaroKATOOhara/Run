@@ -23,6 +23,8 @@ struct Game {
 	Object body;	// 胴体
 	Object legL;	// 左足
 	Object legR;	// 右足
+	Object footL;	// 左足先端
+	Object footR;	// 右足先端
 };
 
 // 関数
