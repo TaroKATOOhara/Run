@@ -53,8 +53,8 @@ void Init(Game& game)
 	// 初期パラメータ設定
 	Init((game.camera), NewVEC2(0, 0), NewVEC2(WIDTH, HEIGHT), 0xFF0000);		// カメラに対して、色は無意味とする
 	Init((game.body), NewVEC2(0, 0), NewVEC2(100, 75), 0xFF0000);
-	Init((game.legL), NewVEC2(-75, 0), NewVEC2(100, 100), 0x00FF00);	// 足の根元側、原則固定
-	Init((game.legR), NewVEC2( 75, 0), NewVEC2(100, 100), 0x00FF00);
+	Init((game.legL), NewVEC2(-75, 0), NewVEC2(80, 80), 0x00FF00);	// 足の根元側、原則固定
+	Init((game.legR), NewVEC2( 75, 0), NewVEC2(80, 80), 0x00FF00);
 	Init((game.footL), NewVEC2(-75, 0), NewVEC2(100, 100), 0x00FF00);	// 足の先端側、スティック操作で移動する
 	Init((game.footR), NewVEC2( 75, 0), NewVEC2(100, 100), 0x00FF00);
 }
@@ -70,12 +70,24 @@ void Init(Object& object, VEC2 pos, VEC2 size, int c)
 
 void Move(Game& game)	// 1f分の挙動
 {
+	// 左右の足を左右スティック通りの位置に(胴体基準で±75の位置をデフォとする)
+	if (game.inputState.Buttons && XINPUT_BUTTON_LEFT_SHOULDER == 0)
+	{		game.footL.pos.x = game.body.pos.x - 75 + game.inputState.X / 15;
+		game.footL.pos.y = game.body.pos.y + 0 + game.inputState.Y / 15;
+	}
 
+	//if (game.inputState.Buttons && XINPUT_BUTTON_RIGHT_SHOULDER == 0)
+	{
+		game.footR.pos.x = game.body.pos.x + 75 + game.inputState.Rx / 15;
+		game.footR.pos.y = game.body.pos.y + 0 + game.inputState.Ry / 15;
+	}
 }
-
 // ゲーム中のオブジェクトを全描画
 void Draw(Game& game)
 {
+
+	Draw(game.camera, game.footL);
+	Draw(game.camera, game.footR);
 	Draw(game.camera, game.legL);
 	Draw(game.camera, game.legR);
 	Draw(game.camera, game.body);
